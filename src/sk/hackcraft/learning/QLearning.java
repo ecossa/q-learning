@@ -7,13 +7,15 @@ public class QLearning implements Learning {
 	// learning rates
 	private double alpha = 0.1;
 	private double gamma = 0.9;
+	
+	private int rewardLimit = 1;
 
 	private State[] states;
 	private Action[] actions;
 
 	private double[][] qMatrix;
 	
-	//private int[][] rewardMatrix; 					// rewards of states and action
+	private double[] rewardArray;
 
 	private HashMap<State, Integer> stateIndices = new HashMap<>();
 	private HashMap<Action, Integer> actionIndices = new HashMap<>();
@@ -22,6 +24,11 @@ public class QLearning implements Learning {
 		this.states = states;
 		this.actions = actions;
 		buildIndices();
+		buildMatrix();
+	}
+	
+	private void buildMatrix() {
+		qMatrix = new double [states.length][actions.length];
 	}
 
 	private void buildIndices() {
@@ -67,7 +74,7 @@ public class QLearning implements Learning {
 		
 		// Using this possible action, consider to go to the next state
 		double q = qMatrix[currentStateIndex][actionIndex];
-		double r=reward;//double r = getReward(currentState.id, currentAction.id);
+		double r = getReward(currentStateIndex);
 
 		double maxQ = maxQ(nextStateIndex);
 
@@ -75,8 +82,17 @@ public class QLearning implements Learning {
 		qMatrix[currentStateIndex][actionIndex] = value;
 	}
 	
-/*
-	protected double getReward(int state, int action) {
-		return rewardMatrix[state][action];
-	}*/
+	public double getReward(int state) {
+		return rewardArray[state];
+	}
+	
+	public void setBaseReward (int initialState, int okState, int badState) {
+		rewardArray[badState] = rewardLimit *(-1);
+		rewardArray[initialState] = 0;
+		rewardArray[okState] = rewardLimit;
+	}
+	
+	public void spreadReward(int currentState, double rewardValue) {
+		rewardArray[currentState] = rewardValue * gamma;
+	}
 }
